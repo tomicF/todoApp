@@ -8,9 +8,11 @@ import {
 import React, { useState } from "react";
 import { tasks } from "../assets/tasks";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useNavigation } from "@react-navigation/native";
 
 const App = () => {
-  // Initialize state as an array of booleans for each task
+  const navigation = useNavigation();
+
   const [taskStates, setTaskStates] = useState(() =>
     tasks.flatMap((group) => group.tasks.map(() => false))
   );
@@ -25,40 +27,39 @@ const App = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.text}>TO DO: </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("create")}>
           <AntDesign name="pluscircle" size={50} color="#89A8B2" />
         </TouchableOpacity>
       </View>
       <View style={styles.breakLine}></View>
-      <ScrollView style={{ width: "100%" }}>
-        {tasks.map((taskGroup, groupIndex) => (
-          <View key={groupIndex}>
-            <Text style={styles.groupHeader}>{taskGroup.header}</Text>
-            {taskGroup.tasks.map((task, taskIndex) => {
-              // Calculate the flat index for the current task
-              const flatIndex =
-                tasks.slice(0, groupIndex).flatMap((group) => group.tasks)
-                  .length + taskIndex;
-
-              return (
+      {tasks[0].header !== "" && tasks[0].task !== "" ? (
+        <ScrollView>
+          {tasks.map((group, groupIndex) => (
+            <View key={groupIndex}>
+              <Text style={styles.groupHeader}>{group.header}</Text>
+              {group.tasks.map((task, taskIndex) => (
                 <TouchableOpacity
-                  key={flatIndex}
+                  key={taskIndex}
                   style={styles.taskCointainer}
-                  onPress={() => toggleTask(flatIndex)}
+                  onPress={() =>
+                    toggleTask(groupIndex * group.tasks.length + taskIndex)
+                  }
                 >
                   <Text style={styles.taskText}>{task}</Text>
                   <View
                     style={[
                       styles.circle,
-                      taskStates[flatIndex] && { backgroundColor: "#ADD8E6" },
+                      taskStates[
+                        groupIndex * group.tasks.length + taskIndex
+                      ] && { backgroundColor: "#F1F0E8" },
                     ]}
-                  ></View>
+                  />
                 </TouchableOpacity>
-              );
-            })}
-          </View>
-        ))}
-      </ScrollView>
+              ))}
+            </View>
+          ))}
+        </ScrollView>
+      ) : null}
     </View>
   );
 };
